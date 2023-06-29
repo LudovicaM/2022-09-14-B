@@ -6,6 +6,8 @@ package it.polito.tdp.itunes;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import it.polito.tdp.itunes.model.Album;
 import it.polito.tdp.itunes.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -34,7 +36,7 @@ public class FXMLController {
     private Button btnSet; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbA1"
-    private ComboBox<?> cmbA1; // Value injected by FXMLLoader
+    private ComboBox<Album> cmbA1; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtDurata"
     private TextField txtDurata; // Value injected by FXMLLoader
@@ -47,17 +49,54 @@ public class FXMLController {
 
     @FXML
     void doComponente(ActionEvent event) {
-    	
+    	Album album = cmbA1.getValue();
+    	if (album == null) {
+    		txtResult.setText("Selezionare un album dal menu a tendina\n");
+    		return;
+    	}
+    	txtResult.appendText("\nComponente connessa - "+album);
+    	txtResult.appendText("\nDimensione componente = "+model.dimConnessa(album)+
+    			"\n# Album componente = "+model.getTotaleBrani());
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-    	
+    	String durS = txtDurata.getText();
+    	if (durS == "") {
+    		txtResult.setText("Inserire una durata\n");
+    		return;
+    	}
+    	try {
+    		double durata = Double.parseDouble(durS);
+    		model.creaGrafo(durata);
+    		txtResult.setText("Grafo creato\n");
+    		txtResult.appendText("#vertici: "+model.getNumV()+"\n#archi: "+model.getNumE()+"\n\n");
+    		
+    		cmbA1.getItems().addAll(model.getVertici());
+    	}catch (NumberFormatException e) {
+    		txtResult.setText("Inserire un valore numerico per la durata\n");
+    		return;
+    	}
     }
 
     @FXML
     void doEstraiSet(ActionEvent event) {
-
+    	String dTotS = txtX.getText();
+    	if (dTotS == "") {
+    		txtResult.setText("Inserire una durata\n");
+    		return;
+    	}
+    	try {
+    		double dTot = Double.parseDouble(dTotS);
+    		Album a1 = cmbA1.getValue();
+    		txtResult.appendText("\n\nSet estratto:\n");
+    		for (Album aa : model.ricercaSetMassimo(a1, dTot)) {
+    			txtResult.appendText(aa+"\n");
+    		}
+    	}catch(NumberFormatException e) {
+    		txtResult.setText("Inserire un valore numerico per la durata\n");
+    		return;
+    	}
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
